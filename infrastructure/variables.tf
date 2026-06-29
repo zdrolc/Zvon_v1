@@ -22,15 +22,15 @@ variable "supabase_service_key" {
   sensitive   = true
 }
 
-# GoCardless
-variable "gc_secret_id" {
-  description = "GoCardless API secret ID"
+# Enable Banking
+variable "eb_app_id" {
+  description = "Enable Banking Application ID"
   type        = string
   sensitive   = true
 }
 
-variable "gc_secret_key" {
-  description = "GoCardless API secret key"
+variable "eb_private_key" {
+  description = "Enable Banking RSA Private Key"
   type        = string
   sensitive   = true
 }
