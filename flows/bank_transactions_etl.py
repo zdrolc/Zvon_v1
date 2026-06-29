@@ -2,19 +2,71 @@ import os
 import re
 import time
 import traceback
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import date, datetime, timedelta
 
 import httpx
 import jwt
 from supabase import create_client
 
-from telegram import notify_etl_error, notify_reauth_required
-
 # HTTP Client with a longer timeout for banking APIs
 HTTP_CLIENT = httpx.Client(timeout=120.0)
 
 ENABLE_BANKING_API_URL = "https://api.enablebanking.com"
 SYNC_OVERLAP_DAYS = 7
+
+# =============================================================================
+# NOTIFICATIONS (EMAIL)
+# =============================================================================
+
+def send_email_notification(subject: str, body: str):
+    """Sends an email notification using SMTP credentials from environment variables."""
+    smtp_server = os.environ.get("SMTP_SERVER")
+    smtp_port = int(os.environ.get("SMTP_PORT", 465))
+    smtp_user = os.environ.get("SMTP_USER")
+    smtp_password = os.environ.get("SMTP_PASSWORD")
+    email_from = os.environ.get("EMAIL_FROM")
+    email_to = os.environ.get("EMAIL_TO")
+
+    if not all([smtp_server, smtp_user, smtp_password, email_from, email_to]):
+        print("Email credentials not fully configured in environment. Skipping email notification.")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = email_from
+    msg['To'] = email_to
+    msg['Subject'] = subject
+
+    # Convert basic markdown/newlines to HTML
+    html_body = body.replace('\n', '<br>')
+    msg.attach(MIMEText(html_body, 'html'))
+
+    try:
+        if smtp_port == 465:
+            # Implicit SSL
+            with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+                server.login(smtp_user, smtp_password)
+                server.send_message(msg)
+        else:
+            # Explicit TLS (usually port 587)
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_password)
+                server.send_message(msg)
+        print("Email notification sent successfully.")
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
+
+def notify_reauth_required(account_name: str, message: str):
+    subject = f"Action Required: Re-authenticate {account_name}"
+    send_email_notification(subject, message)
+
+def notify_etl_error(error_msg: str):
+    subject = "Fintop ETL Error Alert"
+    body = f"<b>The Fintop Bank ETL process has failed:</b><br><br><pre>{error_msg}</pre>"
+    send_email_notification(subject, body)
 
 # =============================================================================
 # AUTHENTICATION & SETUP
