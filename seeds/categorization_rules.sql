@@ -9,16 +9,9 @@ DELETE FROM categorization_rules WHERE user_id IS NULL;
 -- Uso: (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL)
 
 -- Supermercados
-INSERT INTO categorization_rules (pattern, match_type, field, category_id, priority) VALUES
-('mercadona', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('carrefour', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('lidl', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('aldi', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('dia ', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('eroski', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('condor', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('supermercados mas', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 10),
-('el corte ingles', 'contains', 'description', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL), 5);
+INSERT INTO categorization_rules (search_term, category_id) VALUES 
+('mercadona', (SELECT id FROM categories WHERE name = 'Supermercado' AND user_id IS NULL)),
+('netflix', (SELECT id FROM categories WHERE name = 'Suscripciones' AND user_id IS NULL));
 
 -- Restaurantes y cafeterías
 INSERT INTO categorization_rules (pattern, match_type, field, category_id, priority) VALUES
