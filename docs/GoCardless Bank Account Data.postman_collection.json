@@ -1,0 +1,378 @@
+{
+  "info": {
+    "_postman_id": "a65cd37e-15ab-4a2f-91bc-97550d42b5c6",
+    "name": "GoCardless Bank Account Data",
+    "description": "Colección lista para GoCardless Bank Account Data (PSD2). Paso 1: Obtener token. Paso 2: Crear agreement. Paso 3: Crear requisition. Paso 4: Obtener cuentas y movimientos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "20193990",
+    "_collection_link": "https://go.postman.co/collection/20193990-a65cd37e-15ab-4a2f-91bc-97550d42b5c6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1 - Obtener Access Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "",
+              "if (response.access) {",
+              "  pm.collectionVariables.set(\"access_token\", response.access);",
+              "  console.log(\"Access token guardado en collectionVariables\");",
+              "} else {",
+              "  console.log(\"No se ha encontrado access token en la respuesta\");",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"secret_id\": \"{{SECRET_ID}}\",\n  \"secret_key\": \"{{SECRET_KEY}}\"\n}"
+        },
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/token/new/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "token",
+            "new",
+            ""
+          ]
+        },
+        "description": "Obtiene un access token válido para el resto de endpoints"
+      },
+      "response": []
+    },
+    {
+      "name": "2 - Listar bancos (España)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/institutions/?country=ES",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "institutions",
+            ""
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "ES"
+            }
+          ]
+        },
+        "description": "Lista instituciones financieras disponibles en España."
+      },
+      "response": []
+    },
+    {
+      "name": "3 - Crear End User Agreement",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "",
+              "if (response.access) {",
+              "  pm.collectionVariables.set(\"agreement_id\", response.id);",
+              "  console.log(\"agreement_id guardado en collectionVariables\");",
+              "} else {",
+              "  console.log(\"No se ha encontrado agreement_id en la respuesta\");",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"max_historical_days\": 90,\n  \"access_valid_for_days\": 30,\n  \"institution_id\": \"CAIXABANK_CAIXESBB\"\n}"
+        },
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "agreements",
+            "enduser",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4 - Crear Requisition (link de conexión al banco)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "",
+              "if (response.access) {",
+              "  pm.collectionVariables.set(\"requisition_id\", response.id);",
+              "  console.log(\"requisition_id guardado en collectionVariables\");",
+              "} else {",
+              "  console.log(\"No se ha encontrado requisition_id en la respuesta\");",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"redirect\": \"https://example.com/callback\",\n  \"institution_id\": \"CAIXABANK_CAIXESBB\",\n  \"agreement\": \"{{agreement_id}}\",\n  \"reference\": \"fintop\"\n}"
+        },
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/requisitions/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "requisitions",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5 - Obtener Requisition (obtener cuentas)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/requisitions/{{requisition_id}}/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "requisitions",
+            "{{requisition_id}}",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6 - Obtener Movimientos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/accounts/{{account_id}}/transactions/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "accounts",
+            "{{account_id}}",
+            "transactions",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7 - Obtener Balances",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/accounts/{{account_id}}/transactions/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "accounts",
+            "{{account_id}}",
+            "transactions",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8 - Obtener Detalles cuenta",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "https://bankaccountdata.gocardless.com/api/v2/accounts/{{account_id}}/transactions/",
+          "protocol": "https",
+          "host": [
+            "bankaccountdata",
+            "gocardless",
+            "com"
+          ],
+          "path": [
+            "api",
+            "v2",
+            "accounts",
+            "{{account_id}}",
+            "transactions",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "agreement_id",
+      "value": ""
+    },
+    {
+      "key": "requisition_id",
+      "value": ""
+    },
+    {
+      "key": "account_id",
+      "value": ""
+    }
+  ]
+}
