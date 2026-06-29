@@ -138,12 +138,12 @@ resource "google_cloud_run_v2_job" "bank_etl" {
           value = var.supabase_service_key
         }
         env {
-          name  = "GC_SECRET_ID"
-          value = var.gc_secret_id
+          name  = "EB_APP_ID"
+          value = var.eb_app_id
         }
         env {
-          name  = "GC_SECRET_KEY"
-          value = var.gc_secret_key
+          name  = "EB_PRIVATE_KEY"
+          value = var.eb_private_key
         }
         env {
           name  = "TELEGRAM_BOT_TOKEN"
